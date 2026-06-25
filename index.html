@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>真實時薪與工作 CP 值比較器</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --soft-blue: #eff6ff;
+      --green: #16a34a;
+      --yellow: #ca8a04;
+      --red: #dc2626;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 260px);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 56px;
+    }
+
+    .hero { text-align: center; margin-bottom: 28px; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: var(--primary-dark);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 { margin: 0 0 16px; font-size: 22px; }
+
+
+    .edit-banner {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .edit-banner.show {
+      display: block;
+    }
+
+    .section-title {
+      margin: 22px 0 12px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      font-size: 16px;
+      color: #374151;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    input, select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 16px;
+      color: var(--text);
+      background: white;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.15s;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .primary-btn {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+    }
+
+    .primary-btn:hover { background: var(--primary-dark); }
+
+    .secondary-btn {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .secondary-btn:hover { background: #e5e7eb; }
+
+    .danger-btn {
+      background: #fef2f2;
+      color: var(--red);
+    }
+
+    .danger-btn:hover { background: #fee2e2; }
+
+    .empty-state {
+      min-height: 260px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 2px dashed #dbe4f0;
+      border-radius: 18px;
+      padding: 28px;
+      background: #fbfdff;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .job-name { margin: 0; font-size: 20px; }
+
+    .score-pill {
+      min-width: 90px;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: white;
+      font-weight: 900;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .score-good { background: var(--green); }
+    .score-mid { background: var(--yellow); }
+    .score-low { background: var(--red); }
+
+    .big-number {
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--soft-blue);
+      margin-bottom: 16px;
+    }
+
+    .big-number .label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .big-number .value {
+      font-size: clamp(34px, 6vw, 48px);
+      line-height: 1.1;
+      font-weight: 1000;
+      color: var(--primary-dark);
+      margin-top: 5px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 14px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stat .value {
+      margin-top: 4px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .score-breakdown {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .type-score-card {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #ffffff;
+    }
+
+    .type-score-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .type-score-name { font-weight: 900; font-size: 16px; }
+    .type-score-value { font-weight: 1000; font-size: 20px; }
+
+    .score-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: var(--primary);
+      transition: width 0.25s ease;
+    }
+
+    .type-score-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .advice {
+      padding: 16px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      margin-bottom: 14px;
+    }
+
+    .advice h3 { margin: 0 0 8px; font-size: 17px; }
+    .advice p { margin: 0; color: #374151; }
+
+    .warning { border-left-color: var(--yellow); background: #fffbeb; }
+    .danger { border-left-color: var(--red); background: #fef2f2; }
+    .success { border-left-color: var(--green); background: #f0fdf4; }
+
+    .history-card {
+      grid-column: 1 / -1;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .rank {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: var(--primary-dark);
+      font-weight: 900;
+    }
+
+    .small-pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #374151;
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-btn {
+      padding: 7px 10px;
+      font-size: 13px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .mini-btn:hover { background: #e5e7eb; }
+
+    .mini-danger {
+      background: #fef2f2;
+      color: var(--red);
+    }
+
+    .mini-danger:hover { background: #fee2e2; }
+
+    .comparison-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .formula-box {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f9fafb;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .formula-box strong { color: #374151; }
+
+    .hidden { display: none; }
+
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+      .container {
+        width: min(100% - 22px, 760px);
+        padding-top: 26px;
+      }
+      .card { padding: 18px; border-radius: 18px; }
+    }
+
+    @media (max-width: 520px) {
+      .grid-2, .stats { grid-template-columns: 1fr; }
+      .button-row { flex-direction: column; }
+      .result-header { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="badge">學生打工 / 實習適用</div>
+      <h1>真實時薪與工作 CP 值比較器</h1>
+      <p class="subtitle">
+        輸入不同工作資料，系統會換算時薪、計算真實時薪、綜合 CP、賺錢型、履歷型、輕鬆型分數，
+        並自動保留紀錄，幫你比較哪份工作更值得。
+      </p>
+    </section>
+
+    <section class="layout">
+      <form class="card" id="calculatorForm">
+        <h2 id="formTitle">新增一份工作</h2>
+        <div class="edit-banner" id="editBanner">目前正在編輯既有紀錄，修改後會覆蓋原本那筆資料。</div>
+
+        <div class="field">
+          <label for="jobName">工作名稱</label>
+          <input id="jobName" type="text" placeholder="例如：財務部實習生、咖啡廳工讀生" />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="salaryType">薪資類型</label>
+            <select id="salaryType">
+              <option value="hourly" selected>時薪</option>
+              <option value="daily">日薪</option>
+              <option value="monthly">月薪</option>
+            </select>
+            <div class="hint">系統會自動換算成表面時薪，再計算真實時薪。</div>
+          </div>
+
+          <div class="field">
+            <label for="salaryAmount">薪資金額（元）</label>
+            <input id="salaryAmount" type="number" min="0" step="1" placeholder="例如：190、1200、12000" required />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="workHours">每天工作時數</label>
+            <input id="workHours" type="number" min="0" step="0.5" placeholder="例如：5" required />
+          </div>
+
+          <div class="field">
+            <label for="workDays">每週工作天數</label>
+            <input id="workDays" type="number" min="0" max="7" step="0.5" placeholder="例如：3" required />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="commuteMinutes">單趟通勤時間（分鐘）</label>
+            <input id="commuteMinutes" type="number" min="0" step="1" placeholder="例如：45" required />
+          </div>
+
+          <div class="field">
+            <label for="transportCost">單趟交通費（元）</label>
+            <input id="transportCost" type="number" min="0" step="1" placeholder="例如：30" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="goalMode">我找這份工作主要是為了</label>
+          <select id="goalMode">
+            <option value="balanced" selected>平衡一點：薪水、履歷、輕鬆都要看</option>
+            <option value="money">賺錢：希望投入時間換到更多收入</option>
+            <option value="career">履歷：希望累積經驗，對未來有幫助</option>
+            <option value="comfort">輕鬆：希望不要太累，通勤和排班要舒服</option>
+          </select>
+          <div class="hint">系統會根據你的目標，給出更貼近需求的建議。</div>
+        </div>
+
+        <h3 class="section-title">主觀評分</h3>
+        <p class="hint">
+          請依照你自己的目標評分，不需要追求完全客觀。這些分數會影響賺錢型、履歷型、輕鬆型結果。
+        </p>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="resumeScore">履歷加分</label>
+            <select id="resumeScore">
+              <option value="1">1｜和未來方向幾乎無關</option>
+              <option value="2">2｜有一點經驗可寫</option>
+              <option value="3" selected>3｜普通，可當基本工作經驗</option>
+              <option value="4">4｜和未來方向有關，履歷有幫助</option>
+              <option value="5">5｜高度相關，能明顯增加競爭力</option>
+            </select>
+            <div class="hint">看這份工作能不能讓你的履歷更有說服力。</div>
+          </div>
+
+          <div class="field">
+            <label for="learningScore">學習價值</label>
+            <select id="learningScore">
+              <option value="1">1｜重複性高，幾乎學不到新技能</option>
+              <option value="2">2｜能學到一些基本流程</option>
+              <option value="3" selected>3｜普通，有機會累積基礎經驗</option>
+              <option value="4">4｜能接觸實務技能，值得學</option>
+              <option value="5">5｜能明顯提升能力，對未來很有幫助</option>
+            </select>
+            <div class="hint">看你能不能學到未來也用得上的能力。</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="flexibilityScore">排班彈性</label>
+            <select id="flexibilityScore">
+              <option value="1">1｜時間很固定，難以調整</option>
+              <option value="2">2｜偶爾可調，但限制較多</option>
+              <option value="3" selected>3｜普通，可接受一般排班</option>
+              <option value="4">4｜大多能配合課表或個人安排</option>
+              <option value="5">5｜非常彈性，很適合學生安排時間</option>
+            </select>
+            <div class="hint">看這份工作能不能配合課表、生活和臨時安排。</div>
+          </div>
+
+          <div class="field">
+            <label for="intensityScore">工作強度</label>
+            <select id="intensityScore">
+              <option value="1">1｜很輕鬆，壓力和體力負擔低</option>
+              <option value="2">2｜稍微忙，但大多能負荷</option>
+              <option value="3" selected>3｜普通，有忙有閒</option>
+              <option value="4">4｜偏累，可能需要久站、趕時間或高專注</option>
+              <option value="5">5｜非常累，長期做可能消耗很大</option>
+            </select>
+            <div class="hint">這一項分數越高，代表越累，會在輕鬆型與綜合 CP 中扣分。</div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="primary-btn" type="submit" id="submitBtn">計算並加入紀錄</button>
+          <button class="secondary-btn" type="button" id="resetBtn">清除輸入</button>
+          <button class="secondary-btn hidden" type="button" id="cancelEditBtn">取消編輯</button>
+        </div>
+      </form>
+
+      <section class="card">
+        <h2>最新計算結果</h2>
+
+        <div id="emptyState" class="empty-state">
+          <div>
+            <strong>新增工作後，結果會出現在這裡。</strong>
+            <p>你可以先輸入 2～3 份工作，下面會自動排名比較。</p>
+          </div>
+        </div>
+
+        <div id="resultPanel" class="hidden">
+          <div class="result-header">
+            <div>
+              <p class="job-name" id="resultJobName">未命名工作</p>
+              <div class="hint">綜合考慮薪資、通勤、履歷、學習與工作強度</div>
+            </div>
+            <div class="score-pill" id="cpScore">0</div>
+          </div>
+
+          <div class="big-number">
+            <div class="label">算入通勤與交通費後的真實時薪</div>
+            <div class="value" id="realHourlyWage">0 元</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="label">表面時薪</div>
+              <div class="value" id="surfaceHourlyWage">0 元</div>
+            </div>
+            <div class="stat">
+              <div class="label">扣交通費後時薪</div>
+              <div class="value" id="afterTransportHourlyWage">0 元</div>
+            </div>
+            <div class="stat">
+              <div class="label">預估月收入</div>
+              <div class="value" id="monthlyIncome">0 元</div>
+            </div>
+            <div class="stat">
+              <div class="label">每月交通費</div>
+              <div class="value" id="monthlyTransportCost">0 元</div>
+            </div>
+            <div class="stat">
+              <div class="label">每月通勤時間</div>
+              <div class="value" id="monthlyCommuteHours">0 小時</div>
+            </div>
+            <div class="stat">
+              <div class="label">每月工作天數</div>
+              <div class="value" id="monthlyWorkDays">0 天</div>
+            </div>
+          </div>
+
+          <div class="score-breakdown">
+            <div class="type-score-card">
+              <div class="type-score-top">
+                <div class="type-score-name">賺錢型分數</div>
+                <div class="type-score-value" id="moneyTypeScore">0 分</div>
+              </div>
+              <div class="score-bar"><div class="score-bar-fill" id="moneyTypeBar"></div></div>
+              <p class="type-score-desc" id="moneyTypeDesc">適合想以賺錢效率為主的人。</p>
+            </div>
+
+            <div class="type-score-card">
+              <div class="type-score-top">
+                <div class="type-score-name">履歷型分數</div>
+                <div class="type-score-value" id="careerTypeScore">0 分</div>
+              </div>
+              <div class="score-bar"><div class="score-bar-fill" id="careerTypeBar"></div></div>
+              <p class="type-score-desc" id="careerTypeDesc">適合想累積經驗、讓履歷更好看的人。</p>
+            </div>
+
+            <div class="type-score-card">
+              <div class="type-score-top">
+                <div class="type-score-name">輕鬆型分數</div>
+                <div class="type-score-value" id="comfortTypeScore">0 分</div>
+              </div>
+              <div class="score-bar"><div class="score-bar-fill" id="comfortTypeBar"></div></div>
+              <p class="type-score-desc" id="comfortTypeDesc">適合想找低壓、通勤少、排班彈性的工作。</p>
+            </div>
+          </div>
+
+          <div class="advice" id="mainAdvice">
+            <h3>建議</h3>
+            <p id="mainAdviceText"></p>
+          </div>
+
+          <div id="extraAdvice"></div>
+
+          <div class="advice" id="interviewAdvice">
+            <h3>面試時建議確認</h3>
+            <p id="interviewAdviceText"></p>
+          </div>
+
+          <div class="formula-box">
+            <strong>真實時薪公式：</strong><br />
+            （每日薪水 − 每日交通費）÷（每日工時 + 來回通勤時間）
+          </div>
+        </div>
+      </section>
+
+      <section class="card history-card">
+        <div class="history-top">
+          <div>
+            <h2>工作比較紀錄</h2>
+            <div class="hint">資料會存在你的瀏覽器本機，不會上傳。重新打開同一個瀏覽器仍會保留。</div>
+          </div>
+          <div class="button-row">
+            <button class="secondary-btn" type="button" id="exportBtn">匯出 CSV</button>
+            <button class="danger-btn" type="button" id="clearHistoryBtn">清空紀錄</button>
+          </div>
+        </div>
+
+        <div id="historyEmpty" class="empty-state">
+          <div>
+            <strong>目前還沒有工作紀錄。</strong>
+            <p>新增幾份工作後，這裡會自動按照綜合 CP 分數排名。</p>
+          </div>
+        </div>
+
+        <div id="historyTableWrap" class="table-wrap hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>工作名稱</th>
+                <th>綜合 CP</th>
+                <th>目標</th>
+                <th>真實時薪</th>
+                <th>賺錢型</th>
+                <th>履歷型</th>
+                <th>輕鬆型</th>
+                <th>月收入</th>
+                <th>月通勤</th>
+                <th>最適合</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+
+        <p class="comparison-note" id="comparisonNote"></p>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const form = $("calculatorForm");
+    const resetBtn = $("resetBtn");
+    const cancelEditBtn = $("cancelEditBtn");
+    const clearHistoryBtn = $("clearHistoryBtn");
+    const exportBtn = $("exportBtn");
+    const STORAGE_KEY = "realHourlyWageJobRecordsV3";
+
+    let records = loadRecords();
+    let editingRecordId = null;
+
+    function formatNumber(value, digits = 1) {
+      return Number(value).toLocaleString("zh-TW", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function getScoreClass(score) {
+      if (score >= 80) return "score-good";
+      if (score >= 50) return "score-mid";
+      return "score-low";
+    }
+
+    function getTypeScoreDesc(type, score) {
+      const level = score >= 80 ? "很高" : score >= 65 ? "不錯" : score >= 50 ? "普通" : "偏低";
+
+      if (type === "money") {
+        return `賺錢型評價：${level}。這項主要看真實時薪、交通費與通勤時間。`;
+      }
+
+      if (type === "career") {
+        return `履歷型評價：${level}。這項主要看履歷加分、學習價值，也會參考工作是否值得投入時間。`;
+      }
+
+      return `輕鬆型評價：${level}。這項主要看通勤負擔、排班彈性與工作強度。`;
+    }
+
+    function updateTypeScore(idPrefix, score, type) {
+      const roundedScore = Math.round(clamp(score, 0, 100));
+      $(`${idPrefix}Score`).textContent = `${roundedScore} 分`;
+      $(`${idPrefix}Bar`).style.width = `${roundedScore}%`;
+      $(`${idPrefix}Desc`).textContent = getTypeScoreDesc(type, roundedScore);
+    }
+
+
+    function getSalaryTypeLabel(type) {
+      if (type === "daily") return "日薪";
+      if (type === "monthly") return "月薪";
+      return "時薪";
+    }
+
+    function getGoalLabel(goal) {
+      if (goal === "money") return "賺錢";
+      if (goal === "career") return "履歷";
+      if (goal === "comfort") return "輕鬆";
+      return "平衡";
+    }
+
+    function getGoalAdvice(record) {
+      if (record.goalMode === "money") {
+        if (record.moneyTypeScore >= 75) return "以賺錢為目標來看，這份工作的收入效率不錯。";
+        return "以賺錢為目標來看，這份工作可能不是最有效率，建議多比較真實時薪更高或通勤更短的選項。";
+      }
+
+      if (record.goalMode === "career") {
+        if (record.careerTypeScore >= 75) return "以累積履歷為目標來看，這份工作值得考慮，重點是確認實際能接觸到哪些任務。";
+        return "以累積履歷為目標來看，這份工作的履歷或學習價值不算特別突出，建議確認工作內容是否真的有成長性。";
+      }
+
+      if (record.goalMode === "comfort") {
+        if (record.comfortTypeScore >= 75) return "以輕鬆穩定為目標來看，這份工作相對適合，通勤、彈性或強度表現不錯。";
+        return "以輕鬆為目標來看，這份工作可能有通勤、排班或工作強度上的負擔，建議再確認細節。";
+      }
+
+      return "以平衡角度來看，建議同時觀察真實時薪、履歷價值和工作負擔，不要只看單一分數。";
+    }
+
+    function getInterviewQuestions(record) {
+      const questions = [];
+
+      if (record.commuteMinutes > 45) {
+        questions.push("這份工作單趟通勤偏久，建議詢問是否能固定較長班，避免短班卻花太多時間通勤。");
+      }
+
+      if (record.intensityScoreInput >= 4) {
+        questions.push("工作強度偏高，建議詢問實際工作內容、尖峰時段、是否需要久站、搬重物或高壓處理事情。");
+      }
+
+      if (record.resumeScoreInput >= 4 || record.learningScoreInput >= 4) {
+        questions.push("履歷或學習價值偏高，建議詢問會接觸哪些實際任務、是否有人帶、能不能參與專案或使用專業工具。");
+      }
+
+      if (record.flexibilityScoreInput <= 2) {
+        questions.push("排班彈性偏低，建議確認是否能配合課表、考試週、臨時請假與排班調整。");
+      }
+
+      if (record.realHourlyWage < record.surfaceHourlyWage * 0.75) {
+        questions.push("通勤與交通費讓真實時薪下降不少，建議確認是否有交通補助、遠端可能性或更集中的排班方式。");
+      }
+
+      if (record.salaryType === "monthly") {
+        questions.push("這份工作是月薪制，建議確認實際每週工時、是否有加班、請假是否影響薪資。");
+      }
+
+      if (questions.length === 0) {
+        questions.push("這份工作的數據看起來沒有明顯警訊，面試時可以主要確認實際工作內容、排班方式和是否有人帶。");
+      }
+
+      return questions;
+    }
+
+    function getMainAdvice(score) {
+      if (score >= 80) {
+        return { className: "success", text: "這份工作的綜合 CP 值很不錯，值得認真考慮。" };
+      }
+      if (score >= 65) {
+        return { className: "", text: "這份工作可以考慮，但建議你再想清楚自己比較重視賺錢、履歷還是學習。" };
+      }
+      if (score >= 50) {
+        return { className: "warning", text: "這份工作的 CP 值普通，建議拿其他職缺一起比較，不要只看表面時薪。" };
+      }
+      return { className: "danger", text: "這份工作的 CP 值偏低，除非履歷或學習價值很高，否則不太推薦。" };
+    }
+
+    function getBestType(record) {
+      const scores = [
+        { name: "賺錢型", score: record.moneyTypeScore },
+        { name: "履歷型", score: record.careerTypeScore },
+        { name: "輕鬆型", score: record.comfortTypeScore }
+      ].sort((a, b) => b.score - a.score);
+
+      return scores[0].name;
+    }
+
+    function calculateRecord() {
+      const jobName = $("jobName").value.trim() || "未命名工作";
+      const salaryType = $("salaryType").value;
+      const salaryAmount = Number($("salaryAmount").value);
+      const workHours = Number($("workHours").value);
+      const workDays = Number($("workDays").value);
+      const goalMode = $("goalMode").value;
+      const commuteMinutes = Number($("commuteMinutes").value);
+      const transportCost = Number($("transportCost").value);
+
+      const resumeScoreInput = Number($("resumeScore").value);
+      const learningScoreInput = Number($("learningScore").value);
+      const flexibilityScoreInput = Number($("flexibilityScore").value);
+      const intensityScoreInput = Number($("intensityScore").value);
+
+      if (salaryAmount <= 0 || workHours <= 0 || workDays <= 0 || commuteMinutes < 0 || transportCost < 0) {
+        alert("請確認薪資、工時、工作天數都有正確填寫。");
+        return null;
+      }
+
+      const monthlyWorkDays = workDays * 4.33;
+
+      let hourlyWage = salaryAmount;
+      if (salaryType === "daily") {
+        hourlyWage = salaryAmount / workHours;
+      } else if (salaryType === "monthly") {
+        hourlyWage = salaryAmount / monthlyWorkDays / workHours;
+      }
+
+      const dailyPay = hourlyWage * workHours;
+      const dailyTransportCost = transportCost * 2;
+      const dailyCommuteHours = (commuteMinutes * 2) / 60;
+      const dailyTotalHours = workHours + dailyCommuteHours;
+      const dailyIncomeAfterTransport = dailyPay - dailyTransportCost;
+
+      const surfaceHourlyWage = hourlyWage;
+      const afterTransportHourlyWage = dailyIncomeAfterTransport / workHours;
+      const realHourlyWage = dailyIncomeAfterTransport / dailyTotalHours;
+
+      const monthlyIncome = dailyPay * monthlyWorkDays;
+      const monthlyTransportCost = dailyTransportCost * monthlyWorkDays;
+      const monthlyCommuteHours = dailyCommuteHours * monthlyWorkDays;
+
+      const moneyScore = Math.min((realHourlyWage / 200) * 40, 40);
+      const resumeScore = (resumeScoreInput / 5) * 20;
+      const learningScore = (learningScoreInput / 5) * 20;
+      const flexibilityScore = (flexibilityScoreInput / 5) * 10;
+      const intensityPenalty = (intensityScoreInput / 5) * 15;
+
+      const rawCpScore = moneyScore + resumeScore + learningScore + flexibilityScore - intensityPenalty + 25;
+      const cpScore = Math.round(clamp(rawCpScore, 0, 100));
+
+      const commuteScoreForType = commuteMinutes <= 15 ? 100 :
+        commuteMinutes <= 30 ? 85 :
+        commuteMinutes <= 45 ? 70 :
+        commuteMinutes <= 60 ? 55 :
+        commuteMinutes <= 75 ? 35 : 15;
+
+      const moneyEfficiencyScore = clamp((realHourlyWage / 200) * 100, 0, 100);
+      const intensityComfortScore = ((6 - intensityScoreInput) / 5) * 100;
+      const flexibilityPercent = (flexibilityScoreInput / 5) * 100;
+      const resumePercent = (resumeScoreInput / 5) * 100;
+      const learningPercent = (learningScoreInput / 5) * 100;
+
+      const moneyTypeScore = moneyEfficiencyScore * 0.70 + commuteScoreForType * 0.20 + intensityComfortScore * 0.10;
+      const careerTypeScore = resumePercent * 0.40 + learningPercent * 0.35 + moneyEfficiencyScore * 0.15 + commuteScoreForType * 0.10;
+      const comfortTypeScore = commuteScoreForType * 0.35 + intensityComfortScore * 0.30 + flexibilityPercent * 0.25 + moneyEfficiencyScore * 0.10;
+
+      let goalAdjustedScore = cpScore;
+      if (goalMode === "money") {
+        goalAdjustedScore = Math.round(clamp(moneyTypeScore, 0, 100));
+      } else if (goalMode === "career") {
+        goalAdjustedScore = Math.round(clamp(careerTypeScore, 0, 100));
+      } else if (goalMode === "comfort") {
+        goalAdjustedScore = Math.round(clamp(comfortTypeScore, 0, 100));
+      }
+
+      return {
+        id: editingRecordId || Date.now().toString(),
+        createdAt: editingRecordId
+          ? (records.find((item) => item.id === editingRecordId)?.createdAt || new Date().toISOString())
+          : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        jobName,
+        salaryType,
+        salaryAmount,
+        goalMode,
+        hourlyWage,
+        workHours,
+        workDays,
+        commuteMinutes,
+        transportCost,
+        resumeScoreInput,
+        learningScoreInput,
+        flexibilityScoreInput,
+        intensityScoreInput,
+        monthlyWorkDays,
+        surfaceHourlyWage,
+        afterTransportHourlyWage,
+        realHourlyWage,
+        monthlyIncome,
+        monthlyTransportCost,
+        monthlyCommuteHours,
+        cpScore,
+        goalAdjustedScore,
+        moneyTypeScore: Math.round(clamp(moneyTypeScore, 0, 100)),
+        careerTypeScore: Math.round(clamp(careerTypeScore, 0, 100)),
+        comfortTypeScore: Math.round(clamp(comfortTypeScore, 0, 100))
+      };
+    }
+
+    function showLatestResult(record) {
+      $("emptyState").classList.add("hidden");
+      $("resultPanel").classList.remove("hidden");
+
+      $("resultJobName").textContent = record.jobName;
+
+      const cpScoreElement = $("cpScore");
+      cpScoreElement.textContent = `${record.cpScore} 分`;
+      cpScoreElement.className = `score-pill ${getScoreClass(record.cpScore)}`;
+
+      $("realHourlyWage").textContent = `${formatNumber(record.realHourlyWage)} 元`;
+      $("surfaceHourlyWage").textContent = `${formatNumber(record.surfaceHourlyWage)} 元`;
+      $("afterTransportHourlyWage").textContent = `${formatNumber(record.afterTransportHourlyWage)} 元`;
+      $("monthlyIncome").textContent = `${formatNumber(record.monthlyIncome)} 元`;
+      $("monthlyTransportCost").textContent = `${formatNumber(record.monthlyTransportCost)} 元`;
+      $("monthlyCommuteHours").textContent = `${formatNumber(record.monthlyCommuteHours)} 小時`;
+      $("monthlyWorkDays").textContent = `${formatNumber(record.monthlyWorkDays)} 天`;
+
+      updateTypeScore("moneyType", record.moneyTypeScore, "money");
+      updateTypeScore("careerType", record.careerTypeScore, "career");
+      updateTypeScore("comfortType", record.comfortTypeScore, "comfort");
+
+      const advice = getMainAdvice(record.cpScore);
+      const mainAdvice = $("mainAdvice");
+      mainAdvice.className = `advice ${advice.className}`;
+      $("mainAdviceText").textContent = advice.text;
+
+      const extraAdvice = $("extraAdvice");
+      extraAdvice.innerHTML = "";
+
+      const bestType = getBestType(record);
+      const bestReason = {
+        "賺錢型": "如果你的目標是暑假多賺一點錢，這份工作的收入效率相對比較值得看。",
+        "履歷型": "如果你的目標是累積經驗、讓履歷更好看，這份工作比較值得考慮。",
+        "輕鬆型": "如果你的目標是不要太累、通勤不要太麻煩，這份工作比較符合需求。"
+      };
+
+      extraAdvice.innerHTML += `
+        <div class="advice">
+          <h3>最適合類型：${bestType}</h3>
+          <p>${bestReason[bestType]}</p>
+        </div>
+      `;
+
+      extraAdvice.innerHTML += `
+        <div class="advice">
+          <h3>依照你的目標：${getGoalLabel(record.goalMode)}</h3>
+          <p>${getGoalAdvice(record)}</p>
+        </div>
+      `;
+
+      const realHourlyDropPercent = ((record.surfaceHourlyWage - record.realHourlyWage) / record.surfaceHourlyWage) * 100;
+
+      if (realHourlyDropPercent > 25) {
+        extraAdvice.innerHTML += `
+          <div class="advice warning">
+            <h3>通勤成本偏高</h3>
+            <p>
+              你的真實時薪比表面時薪低了約 ${formatNumber(realHourlyDropPercent)}%。
+              這代表通勤時間或交通費正在明顯拉低這份工作的 CP 值。
+            </p>
+          </div>
+        `;
+      }
+
+      if (record.resumeScoreInput >= 4 && record.learningScoreInput >= 4) {
+        extraAdvice.innerHTML += `
+          <div class="advice success">
+            <h3>適合累積經驗</h3>
+            <p>
+              這份工作的履歷加分和學習價值都偏高。即使真實時薪不是最高，
+              如果你目前重視經驗累積，仍然可以認真考慮。
+            </p>
+          </div>
+        `;
+      }
+
+      if (record.intensityScoreInput >= 4 && record.realHourlyWage < record.hourlyWage * 0.8) {
+        extraAdvice.innerHTML += `
+          <div class="advice danger">
+            <h3>注意工作負擔</h3>
+            <p>
+              這份工作強度偏高，而且通勤後的真實時薪也下降不少。
+              建議面試時確認實際工作內容與排班狀況。
+            </p>
+          </div>
+        `;
+      }
+
+      const interviewQuestions = getInterviewQuestions(record);
+      $("interviewAdviceText").innerHTML = interviewQuestions
+        .map((question) => `・${question}`)
+        .join("<br />");
+    }
+
+    function loadRecords() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (error) {
+        console.error("讀取紀錄失敗：", error);
+        return [];
+      }
+    }
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function renderHistory() {
+      const sortedRecords = [...records].sort((a, b) => b.cpScore - a.cpScore);
+
+      if (sortedRecords.length === 0) {
+        $("historyEmpty").classList.remove("hidden");
+        $("historyTableWrap").classList.add("hidden");
+        $("comparisonNote").textContent = "";
+        return;
+      }
+
+      $("historyEmpty").classList.add("hidden");
+      $("historyTableWrap").classList.remove("hidden");
+
+      $("historyBody").innerHTML = sortedRecords.map((record, index) => {
+        return `
+          <tr>
+            <td><span class="rank">${index + 1}</span></td>
+            <td>
+              <strong>${escapeHtml(record.jobName)}</strong><br />
+              <span class="hint">${getSalaryTypeLabel(record.salaryType)} ${formatNumber(record.salaryAmount || record.hourlyWage)}｜單趟 ${formatNumber(record.commuteMinutes, 0)} 分鐘</span>
+            </td>
+            <td><span class="small-pill">${record.cpScore} 分</span></td>
+            <td><span class="small-pill">${getGoalLabel(record.goalMode)}</span></td>
+            <td>${formatNumber(record.realHourlyWage)} 元</td>
+            <td>${record.moneyTypeScore} 分</td>
+            <td>${record.careerTypeScore} 分</td>
+            <td>${record.comfortTypeScore} 分</td>
+            <td>${formatNumber(record.monthlyIncome)} 元</td>
+            <td>${formatNumber(record.monthlyCommuteHours)} 小時</td>
+            <td><span class="small-pill">${getBestType(record)}</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="mini-btn" type="button" onclick="viewRecord('${record.id}')">查看</button>
+                <button class="mini-btn mini-danger" type="button" onclick="deleteRecord('${record.id}')">刪除</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const best = sortedRecords[0];
+      $("comparisonNote").textContent = `目前綜合 CP 最高的是「${best.jobName}」，綜合 CP ${best.cpScore} 分，真實時薪約 ${formatNumber(best.realHourlyWage)} 元。`;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function addRecord(event) {
+      event.preventDefault();
+      const record = calculateRecord();
+      if (!record) return;
+
+      if (editingRecordId) {
+        records = records.map((item) => item.id === editingRecordId ? record : item);
+      } else {
+        records.push(record);
+      }
+
+      saveRecords();
+      showLatestResult(record);
+      renderHistory();
+      exitEditMode();
+    }
+
+    function resetForm() {
+      form.reset();
+      if (editingRecordId) {
+        exitEditMode(false);
+      }
+    }
+
+    function enterEditMode(record) {
+      editingRecordId = record.id;
+
+      $("formTitle").textContent = "編輯工作紀錄";
+      $("submitBtn").textContent = "更新這筆紀錄";
+      $("editBanner").classList.add("show");
+      $("cancelEditBtn").classList.remove("hidden");
+
+      $("jobName").value = record.jobName;
+      $("salaryType").value = record.salaryType || "hourly";
+      $("salaryAmount").value = record.salaryAmount || record.hourlyWage;
+      $("workHours").value = record.workHours;
+      $("workDays").value = record.workDays;
+      $("commuteMinutes").value = record.commuteMinutes;
+      $("transportCost").value = record.transportCost;
+      $("resumeScore").value = record.resumeScoreInput;
+      $("learningScore").value = record.learningScoreInput;
+      $("flexibilityScore").value = record.flexibilityScoreInput;
+      $("intensityScore").value = record.intensityScoreInput;
+      $("goalMode").value = record.goalMode || "balanced";
+    }
+
+    function exitEditMode(clearInputs = true) {
+      editingRecordId = null;
+
+      $("formTitle").textContent = "新增一份工作";
+      $("submitBtn").textContent = "計算並加入紀錄";
+      $("editBanner").classList.remove("show");
+      $("cancelEditBtn").classList.add("hidden");
+
+      if (clearInputs) {
+        form.reset();
+      }
+    }
+
+    function viewRecord(id) {
+      const record = records.find((item) => item.id === id);
+      if (record) {
+        showLatestResult(record);
+        enterEditMode(record);
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteRecord(id) {
+      records = records.filter((item) => item.id !== id);
+      if (editingRecordId === id) {
+        exitEditMode();
+      }
+      saveRecords();
+      renderHistory();
+
+      if (records.length === 0) {
+        $("emptyState").classList.remove("hidden");
+        $("resultPanel").classList.add("hidden");
+      }
+    }
+
+    function clearHistory() {
+      if (!confirm("確定要清空所有工作紀錄嗎？")) return;
+      records = [];
+      exitEditMode();
+      saveRecords();
+      renderHistory();
+      $("emptyState").classList.remove("hidden");
+      $("resultPanel").classList.add("hidden");
+    }
+
+    function exportCSV() {
+      if (records.length === 0) {
+        alert("目前沒有紀錄可以匯出。");
+        return;
+      }
+
+      const headers = [
+        "工作名稱",
+        "綜合CP",
+        "目標",
+        "薪資類型",
+        "薪資金額",
+        "真實時薪",
+        "表面時薪",
+        "扣交通費後時薪",
+        "賺錢型分數",
+        "履歷型分數",
+        "輕鬆型分數",
+        "月收入",
+        "月交通費",
+        "月通勤時間",
+        "單趟通勤分鐘",
+        "單趟交通費",
+        "最適合類型"
+      ];
+
+      const rows = records.map((record) => [
+        record.jobName,
+        record.cpScore,
+        getGoalLabel(record.goalMode),
+        getSalaryTypeLabel(record.salaryType),
+        record.salaryAmount || record.hourlyWage,
+        record.realHourlyWage.toFixed(1),
+        record.surfaceHourlyWage.toFixed(1),
+        record.afterTransportHourlyWage.toFixed(1),
+        record.moneyTypeScore,
+        record.careerTypeScore,
+        record.comfortTypeScore,
+        record.monthlyIncome.toFixed(0),
+        record.monthlyTransportCost.toFixed(0),
+        record.monthlyCommuteHours.toFixed(1),
+        record.commuteMinutes,
+        record.transportCost,
+        getBestType(record)
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "工作CP值比較紀錄.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    form.addEventListener("submit", addRecord);
+    resetBtn.addEventListener("click", resetForm);
+    cancelEditBtn.addEventListener("click", () => exitEditMode());
+    clearHistoryBtn.addEventListener("click", clearHistory);
+    exportBtn.addEventListener("click", exportCSV);
+
+    renderHistory();
+
+    if (records.length > 0) {
+      const latest = [...records].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      showLatestResult(latest);
+    }
+  </script>
+</body>
+</html>
